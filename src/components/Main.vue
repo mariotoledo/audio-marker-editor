@@ -1,7 +1,13 @@
 <template>
   <div>
-    <div class="waveform-wrapper">
-      <av-waveform :canv-width="canvasWidth" :key="canvasWidth" v-bind:canv-height="canvasHeight" audio-src="/static/example.mp3"></av-waveform>
+    <div class="waveform-container">
+    <div class="waveform-wrapper" :style="{width: canvasWidth+'px'}">
+      <av-waveform :canv-width="canvasWidth" :key="canvasWidth" v-bind:canv-height="canvasHeight" audio-src="/static/example.mp3">
+      </av-waveform>
+      <div v-for="marker in markers" :key="marker.time" class="marker" :style="{left: marker.relativePosition + '%'}">
+        <div class="marker-label">{{marker.label}}</div>
+      </div>
+    </div>
     </div>
     <div class="row">
       <div class="col-md-1">
@@ -53,16 +59,31 @@ export default {
       canvasWidth: 500,
       canvasHeight: 120,
       windowfftPower: 7,
+      audioFullLength: 0
     }
+  },
+  mounted: function() {
+    console.log('sdjhfsjg');
+    let audio = document.getElementsByTagName('audio');
+    audio[0].onloadedmetadata = () => {
+      console.log('entering');
+      this.audioFullLength = audio[0].duration;
+      console.log('this.audioFullLength', this.audioFullLength);
+    };
   },
   methods: {
     addMarker: function() {
       let audio = document.getElementsByTagName('audio');
+      let time = this.msToTime(audio[0].currentTime * 1000);
+
       console.log('audio[0].currentTime', audio[0].currentTime);
+      console.log('this.audioFullLength', this.audioFullLength);
+
       this.markers.push({
-        time: this.msToTime(audio[0].currentTime * 1000),
+        time: time,
         msTime: audio[0].currentTime,
         label: '',
+        relativePosition: (audio[0].currentTime / this.audioFullLength) * 100
       })
     },
     removeMarker: function (index) {
@@ -113,7 +134,27 @@ pre {
 .btn-generate-json {
   margin-bottom: 20px;
 }
-.waveform-wrapper {
+.waveform-container {
   overflow-x: scroll;
+  width: 100%;
+}
+.waveform-wrapper {
+  width: auto;
+  position: relative;
+  display: block;
+  margin: auto;
+}
+.marker {
+  width: 1px;
+  height: 120px;
+  background-color: red;
+  position: absolute;
+  bottom: 10px;
+  left: 0px;
+}
+
+.marker-label {
+  position: absolute;
+  bottom: 0px;
 }
 </style>
