@@ -1,6 +1,16 @@
 <template>
   <div>
-    <av-waveform audio-src="/static/example.mp3"></av-waveform>
+    <div class="waveform-wrapper">
+      <av-waveform :canv-width="canvasWidth" :key="canvasWidth" v-bind:canv-height="canvasHeight" audio-src="/static/example.mp3"></av-waveform>
+    </div>
+    <div class="row">
+      <div class="col-md-1">
+        <button class="btn btn-default btn-info" v-on:click="moreZoom">+</button>
+      </div>
+      <div class="col-md-1">
+        <button class="btn btn-default  btn-info" v-on:click="minusZoom">-</button>
+      </div>
+    </div>
     <button v-on:click="addMarker" class="btn btn-primary btn-block btn-add-marker"> Add Marker </button>
     <div class="row" v-for="(marker, index) in markers" :key="marker.time">
       <div class="col-md-5">
@@ -39,7 +49,10 @@ export default {
   name: 'Main',
   data () {
     return {
-      markers: []
+      markers: [],
+      canvasWidth: 500,
+      canvasHeight: 120,
+      windowfftPower: 7,
     }
   },
   methods: {
@@ -49,7 +62,7 @@ export default {
       this.markers.push({
         time: this.msToTime(audio[0].currentTime * 1000),
         msTime: audio[0].currentTime,
-        label: ''
+        label: '',
       })
     },
     removeMarker: function (index) {
@@ -57,6 +70,16 @@ export default {
     },
     msToTime: function(s) {
       return new Date(s).toISOString().slice(11, -1);
+    },
+    moreZoom: function() {
+      console.log('entering', this.canvasWidth);
+      this.canvasWidth += 100;
+      this.windowfftPower ++;
+    },
+    minusZoom: function() {
+      if(this.canvasWidth > 300) {
+        this.canvasWidth -= 100;
+      }
     }
   }
 }
@@ -89,5 +112,8 @@ pre {
 }
 .btn-generate-json {
   margin-bottom: 20px;
+}
+.waveform-wrapper {
+  overflow-x: scroll;
 }
 </style>
